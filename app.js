@@ -39,7 +39,6 @@ app.get('/api/v1/tours/:id/:x', (req, res) => {
     data: { tour: tour },
   });
 });
-
 //// post "writting data"
 app.post('/api/v1/tours', (req, res) => {
   //1) getting post data
