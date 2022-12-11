@@ -8,9 +8,10 @@ app.use(express.json());
 //downloading sync since we need to download it once
 //if we did this inside a route function it will enter the "event loop" and slow our app
 const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/dev-data/data/tours.json`)
+  fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
 );
 
+//// get for all tours
 app.get('/api/v1/tours', (req, res) => {
   res.status(200).json({
     status: 'success',
@@ -18,7 +19,28 @@ app.get('/api/v1/tours', (req, res) => {
     data: { tours: tours },
   });
 });
+//// get for one tour
+app.get('/api/v1/tours/:id/:x', (req, res) => {
+  //1)getting the tour id
+  const id = +req.params.id;
+  console.log(req.params);
+  //2)finding tour with that id
+  const tour = tours.find((tour) => tour.id === id);
+  //3) if tour exist then send it as a respond
+  if (!tour) {
+    res.status(404).json({
+      status: 'fail',
+      message: 'invalid ID',
+    });
+    return;
+  }
+  res.status(200).json({
+    status: 'success',
+    data: { tour: tour },
+  });
+});
 
+//// post "writting data"
 app.post('/api/v1/tours', (req, res) => {
   //1) getting post data
   const postData = req.body;
@@ -29,7 +51,7 @@ app.post('/api/v1/tours', (req, res) => {
   //4) update the tours array
   tours.push(newTour);
   fs.writeFile(
-    `${__dirname}/dev-data/data/tours.json`,
+    `${__dirname}/dev-data/data/tours-simple.json`,
     JSON.stringify(tours),
     (err) => {
       //201 means "updated"
