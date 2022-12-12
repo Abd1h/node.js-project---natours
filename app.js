@@ -4,6 +4,12 @@ const fs = require('fs');
 const app = express();
 // without this "middleware" the post method won't work,
 app.use(express.json());
+////middleware body
+app.use((req, res, next) => {
+  console.log('hello from middleware');
+  next();
+  //without next() middleware life-cycle will be stuck
+});
 
 //downloading sync since we need to download it once
 //if we did this inside a route function it will enter the "event loop" and slow our app
@@ -13,6 +19,9 @@ const tours = JSON.parse(
 
 //// get for all tours
 app.get('/api/v1/tours', (req, res) => {
+  console.log(
+    'hello back form get method, all tho we didnt call you middleware! '
+  );
   res.status(200).json({
     status: 'success',
     results: tours.length,
