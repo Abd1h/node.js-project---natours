@@ -22,23 +22,19 @@ const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
 );
 
-//// get for all tours
-app.get('/api/v1/tours', (req, res) => {
-  console.log(
-    'hello back form get method, all tho we didnt call you middleware! '
-  );
+//// ---------------functions-------------------
+const getAllTours = function (req, res) {
   res.status(200).json({
     status: 'success',
     results: tours.length,
     data: { tours: tours },
   });
-});
-//// get for one tour
-app.get('/api/v1/tours/:id/:x', (req, res) => {
-  //1)getting the tour id
+};
+
+const getSingleTour = function (req, res) {
+  //1) getting the tour id
   const id = +req.params.id;
-  console.log(req.params);
-  //2)finding tour with that id
+  //2) finding tour with that id
   const tour = tours.find((tour) => tour.id === id);
   //3) if tour exist then send it as a respond
   if (!tour) {
@@ -52,9 +48,9 @@ app.get('/api/v1/tours/:id/:x', (req, res) => {
     status: 'success',
     data: { tour: tour },
   });
-});
-//// post "writting data"
-app.post('/api/v1/tours', (req, res) => {
+};
+
+const createNewTour = function (req, res) {
   //1) getting post data
   const postData = req.body;
   //2) create an ID for the new tour
@@ -74,7 +70,30 @@ app.post('/api/v1/tours', (req, res) => {
       });
     }
   );
-});
+};
 
+const updateTour = function (req, res) {
+  res.status(200).json({
+    status: 'success',
+    message: 'tour was updated',
+  });
+};
+const deleteTour = function (req, res) {
+  res.status(200).json({
+    status: 'success',
+    data: 'null',
+  });
+};
+
+//// get for all tours
+app.get('/api/v1/tours', getAllTours);
+//// post "writting data"
+app.post('/api/v1/tours', createNewTour);
+//// get for one tour
+app.get('/api/v1/tours/:id', getSingleTour);
+////update tour
+app.patch('/api/v1/tours/:id', updateTour);
+////delete tour
+app.delete('/api/v1/tours/:id', deleteTour);
 const serverPort = 8000;
 app.listen(serverPort);
