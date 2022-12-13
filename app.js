@@ -85,15 +85,13 @@ const deleteTour = function (req, res) {
   });
 };
 
-//// get for all tours
-app.get('/api/v1/tours', getAllTours);
-//// post "writting data"
-app.post('/api/v1/tours', createNewTour);
-//// get for one tour
-app.get('/api/v1/tours/:id', getSingleTour);
-////update tour
-app.patch('/api/v1/tours/:id', updateTour);
-////delete tour
-app.delete('/api/v1/tours/:id', deleteTour);
+//// handling tour route
+app.route('/api/v1/tours').get(getAllTours).post(createNewTour);
+app
+  .route('/api/v1/tours/:id')
+  .get(getSingleTour)
+  .patch(updateTour)
+  .delete(deleteTour);
+
 const serverPort = 8000;
 app.listen(serverPort);
