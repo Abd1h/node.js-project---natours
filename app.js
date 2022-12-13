@@ -1,9 +1,14 @@
 const express = require('express');
+const morgan = require('morgan');
 const fs = require('fs');
 
 const app = express();
-// without this "middleware" the post method won't work,
+//// without this "middleware" the post method won't work,
 app.use(express.json());
+
+//// morgan middleware
+app.use(morgan('dev'));
+
 ////middleware body
 app.use((req, res, next) => {
   console.log('hello from middleware');
