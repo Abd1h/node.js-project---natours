@@ -150,17 +150,25 @@ const deleteUser = function (req, res) {
 };
 
 //// handling tour route
-app.route('/api/v1/tours').get(getAllTours).post(createTour);
-app
-  .route('/api/v1/tours/:id')
+//1) creating router
+const toursRouter = express.Router();
+//1) mounting router "since its a middleware"
+app.use('/api/v1/tours', toursRouter);
+
+toursRouter.route('/').get(getAllTours).post(createTour);
+toursRouter
+  .route('/:id')
   .get(getSingleTour)
   .patch(updateTour)
   .delete(deleteTour);
+//note that tourRouter will be active only on /api/v1/tours so we DONT write the http address inside route('')
 
 //// handling user route
-app.route('/api/v1/tours').get(getAllUsers).post(createUser);
-app
-  .route('/api/v1/tours/:id')
+const usersRouter = express.Router();
+app.use('/api/v1/users', usersRouter);
+usersRouter.route('/').get(getAllUsers).post(createUser);
+usersRouter
+  .route('/:id')
   .get(getSingleUser)
   .patch(updateUser)
   .delete(deleteUser);
