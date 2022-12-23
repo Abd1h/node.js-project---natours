@@ -1,6 +1,5 @@
 const express = require('express');
 const fs = require('fs');
-const usersRouter = express.Router();
 
 //downloading sync since we need to download it once
 //if we did this inside a route function it will enter the "event loop" and slow our app
@@ -72,6 +71,7 @@ const deleteUser = function (req, res) {
 };
 
 //---------------mounting routers------------------
+const usersRouter = express.Router();
 // 1- for '/api/v1/users'
 usersRouter.route('/').get(getAllUsers).post(createUser);
 // 2- for '/api/v1/users/:id'
