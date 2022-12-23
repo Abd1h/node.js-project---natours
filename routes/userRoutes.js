@@ -1,33 +1,15 @@
 const express = require('express');
-const morgan = require('morgan');
 const fs = require('fs');
-
-const usersRouter = require('./routes/userRoutes');
-// const usersRouter = require('./routes/userRoutes');
-
-const app = express();
-//// without this "middleware" the post method won't work,
-app.use(express.json());
-
-//// morgan middleware
-app.use(morgan('dev'));
-
-////middleware body
-app.use((req, res, next) => {
-  console.log('hello from middleware');
-  next();
-  //without next() middleware life-cycle will be stuck
-});
+const usersRouter = express.Router();
 
 //downloading sync since we need to download it once
 //if we did this inside a route function it will enter the "event loop" and slow our app
 const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
+  fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
 );
 
-//// ---------------functions-------------------
-//1) tours functions
-const getAllTours = function (req, res) {
+//---------------user functions------------------
+const getAllUsers = function (req, res) {
   res.status(200).json({
     status: 'success',
     results: tours.length,
@@ -35,7 +17,7 @@ const getAllTours = function (req, res) {
   });
 };
 
-const getSingleTour = function (req, res) {
+const getSingleUser = function (req, res) {
   //1) getting the tour id
   const id = +req.params.id;
   //2) finding tour with that id
@@ -54,7 +36,7 @@ const getSingleTour = function (req, res) {
   });
 };
 
-const createTour = function (req, res) {
+const createUser = function (req, res) {
   //1) getting post data
   const postData = req.body;
   //2) create an ID for the new tour
@@ -76,35 +58,27 @@ const createTour = function (req, res) {
   );
 };
 
-const updateTour = function (req, res) {
+const updateUser = function (req, res) {
   res.status(200).json({
     status: 'success',
     message: 'tour was updated',
   });
 };
-const deleteTour = function (req, res) {
+const deleteUser = function (req, res) {
   res.status(200).json({
     status: 'success',
     data: 'null',
   });
 };
 
-//// handling tour route
-//1) creating router
-const toursRouter = express.Router();
-//1) mounting router "since its a middleware"
-app.use('/api/v1/tours', toursRouter);
-
-toursRouter.route('/').get(getAllTours).post(createTour);
-toursRouter
+//---------------mounting routers------------------
+// 1- for '/api/v1/users'
+usersRouter.route('/').get(getAllUsers).post(createUser);
+// 2- for '/api/v1/users/:id'
+usersRouter
   .route('/:id')
-  .get(getSingleTour)
-  .patch(updateTour)
-  .delete(deleteTour);
-//note that tourRouter will be active only on /api/v1/tours so we DONT write the http address inside route('')
+  .get(getSingleUser)
+  .patch(updateUser)
+  .delete(deleteUser);
 
-//// handling user route
-app.use('/api/v1/users', usersRouter);
-
-const serverPort = 8000;
-app.listen(serverPort);
+module.exports = usersRouter;
