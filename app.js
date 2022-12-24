@@ -7,7 +7,6 @@ app.use(express.json()); //middleware for post method
 
 // -public middlewares
 const morgan = require('morgan');
-app.use(morgan('dev'));
 
 // -importing routes sub apps
 const usersRouter = require('./routes/userRoutes');
@@ -16,3 +15,9 @@ app.use('/api/v1/tours', toursRouter);
 app.use('/api/v1/users', usersRouter);
 
 //<><><><><><><><><><><><><><><><><><><><><><><><><><>//
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
+
+// build in middleware to acces static files form the browser without setting a route for it
+app.use(express.static('./public'));

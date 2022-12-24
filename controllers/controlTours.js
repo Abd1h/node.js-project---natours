@@ -6,7 +6,6 @@ const tours = JSON.parse(
 //// ---------------functions-------------------
 //callback function of param middleware
 exports.checkID = (req, res, next, val) => {
-  console.log(`hey from checkID`);
   const tour = tours.find((tour) => tour.id === +val);
 
   //return the res, meaning return from here and dont move to the next middleware, so we dont get the error of sending multiple respons
