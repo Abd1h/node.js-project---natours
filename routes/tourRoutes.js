@@ -10,7 +10,7 @@ const toursRouter = express.Router();
 toursRouter
   .route('/')
   .get(toursController.getAllTours)
-  .post(toursController.createTour);
+  .post(toursController.checkPostData, toursController.createTour);
 
 // 3- for '/api/v1/tours/:id'
 // checking if ID is valid using param middlware
