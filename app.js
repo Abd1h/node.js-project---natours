@@ -1,5 +1,6 @@
 // -express
 const express = require('express');
+
 const app = express();
 //exporting to server.js file
 module.exports = app;
@@ -11,6 +12,7 @@ const morgan = require('morgan');
 // -importing routes sub apps
 const usersRouter = require('./routes/userRoutes');
 const toursRouter = require('./routes/tourRoutes');
+
 app.use('/api/v1/tours', toursRouter);
 app.use('/api/v1/users', usersRouter);
 

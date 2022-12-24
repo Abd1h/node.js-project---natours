@@ -1,4 +1,5 @@
 const fs = require('fs');
+
 const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
 );
@@ -6,7 +7,7 @@ const tours = JSON.parse(
 //// ---------------functions-------------------
 //callback function of param middleware
 exports.checkID = (req, res, next, val) => {
-  const tour = tours.find((tour) => tour.id === +val);
+  const tour = tours.find((tourEl) => tourEl.id === +val);
 
   //return the res, meaning return from here and dont move to the next middleware, so we dont get the error of sending multiple respons
   if (!tour) {
@@ -38,7 +39,7 @@ exports.getSingleTour = function (req, res) {
   //1) getting the tour id
   const id = +req.params.id;
   //2) finding tour with that id
-  const tour = tours.find((tour) => tour.id === id);
+  const tour = tours.find((tourEl) => tourEl.id === id);
   // //3) if tour exist then send it as a respond
   // if (!tour) {
   //   res.status(404).json({
@@ -65,7 +66,7 @@ exports.createTour = function (req, res) {
   fs.writeFile(
     `${__dirname}/../dev-data/data/tours-simple.json`,
     JSON.stringify(tours),
-    (err) => {
+    () => {
       //201 means "updated"
       res.status(201).json({
         status: 'success',
