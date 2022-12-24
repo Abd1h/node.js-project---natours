@@ -4,6 +4,16 @@ const tours = JSON.parse(
 );
 
 //// ---------------functions-------------------
+exports.checkID = (req, res, next, val) => {
+  console.log(`hey from checkID`);
+  const tour = tours.find((tour) => tour.id === +val);
+  if (!tour) {
+    return res.status(404).json({ status: 'fail', message: 'invalid ID' });
+  }
+
+  next();
+};
+
 exports.getAllTours = function (req, res) {
   res.status(200).json({
     status: 'success',
@@ -17,14 +27,14 @@ exports.getSingleTour = function (req, res) {
   const id = +req.params.id;
   //2) finding tour with that id
   const tour = tours.find((tour) => tour.id === id);
-  //3) if tour exist then send it as a respond
-  if (!tour) {
-    res.status(404).json({
-      status: 'fail',
-      message: 'invalid ID',
-    });
-    return;
-  }
+  // //3) if tour exist then send it as a respond
+  // if (!tour) {
+  //   res.status(404).json({
+  //     status: 'fail',
+  //     message: 'invalid ID',
+  //   });
+  //   return;
+  // }
   res.status(200).json({
     status: 'success',
     data: { tour: tour },
@@ -41,7 +51,7 @@ exports.createTour = function (req, res) {
   //4) update the tours array
   tours.push(newTour);
   fs.writeFile(
-    `${__dirname}/dev-data/data/tours-simple.json`,
+    `${__dirname}/../dev-data/data/tours-simple.json`,
     JSON.stringify(tours),
     (err) => {
       //201 means "updated"

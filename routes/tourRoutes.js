@@ -13,6 +13,8 @@ toursRouter
   .post(toursController.createTour);
 
 // 3- for '/api/v1/tours/:id'
+// checking if ID is valid using param middlware
+toursRouter.param('id', toursController.checkID);
 toursRouter
   .route('/:id')
   .get(toursController.getSingleTour)
