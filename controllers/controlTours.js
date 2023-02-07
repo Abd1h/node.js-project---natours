@@ -60,12 +60,25 @@ exports.createTour = async function (req, res) {
   }
 };
 
-exports.updateTour = function (req, res) {
-  res.status(200).json({
-    status: 'success',
-    message: 'tour was updated',
-  });
+exports.updateTour = async function (req, res) {
+  try {
+    //1) getting targeted tour id
+    const tourId = req.params.id;
+    //1) update tour with the comming data
+    //NOTE findByIdAndUpdate(ID, new data, options)
+    const tour = await Tour.findByIdAndUpdate(tourId, req.body, {
+      runValidators: true, // will rerun schema validators
+      new: true, // returns the doc after update instead of the original
+    });
+    res.status(200).json({
+      status: 'success',
+      data: tour,
+    });
+  } catch (err) {
+    res.status(404).json({ status: 'fail', message: err });
+  }
 };
+
 exports.deleteTour = function (req, res) {
   res.status(200).json({
     status: 'success',
