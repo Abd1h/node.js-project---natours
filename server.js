@@ -12,7 +12,7 @@ const DBlink = process.env.DATABASE.replace(
   '<DATABASE_PASSWORD>',
   process.env.DATABASE_PASSWORD
 );
-//connecting with our database using mongoose
+//connecting with our database using mongoose ✔
 mongoose
   .connect(DBlink, {
     useNewUrlParser: true,
@@ -21,5 +21,6 @@ mongoose
   }) //NOTE mongoose connect methods return a promise with object
   .then(() => console.log('mongoose connected'));
 
+//starting our server
 const serverPort = 8000;
 app.listen(serverPort, () => console.log(`app running on port ${serverPort}`));
