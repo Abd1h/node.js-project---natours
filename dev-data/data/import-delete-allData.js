@@ -1,6 +1,8 @@
-// this code will run only once in the beggining
+// this code will run independently using "node (file path)"
+//the goal is to "node (file path) --import/--delete" and use that options to take action
 const mongoose = require('mongoose');
 
+//to access env variable
 const dotenv = require('dotenv');
 
 dotenv.config({ path: './config.env' });
@@ -10,10 +12,11 @@ const fs = require('fs');
 const Tour = require('../../models/tourModels');
 
 const allTours = JSON.parse(
-  //dont fucking forget
+  //using JSON.parse to convert the string text to json "annoying error"
   fs.readFileSync(`${__dirname}/tours-simple.json`, 'utf-8')
 );
 
+//connecting to the data base
 const DBlink = process.env.DATABASE.replace(
   '<DATABASE_PASSWORD>',
   process.env.DATABASE_PASSWORD
@@ -26,6 +29,7 @@ mongoose
   })
   .then(() => console.log('mongoose connected'));
 
+// 1) delete all tours on "--delete"
 const deleteAllTours = async function () {
   try {
     await Tour.deleteMany();
@@ -36,7 +40,7 @@ const deleteAllTours = async function () {
   process.exit();
 };
 
-//this function job is to get all the data form tours-simple.js and add them to the database
+// 2) import all tours from the local file and to the database on "--import"
 const importAllTours = async function () {
   try {
     await Tour.create(allTours);
@@ -47,6 +51,7 @@ const importAllTours = async function () {
   process.exit();
 };
 
+//using process.argv wich gives an array of the command
 if (process.argv[2] === '--import') {
   importAllTours();
 }
