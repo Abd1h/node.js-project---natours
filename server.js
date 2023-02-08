@@ -1,5 +1,4 @@
 const mongoose = require('mongoose'); //library for mongoDB, a higher level of abstraction
-
 const dotenv = require('dotenv'); //allow us to create environment variables using config file
 
 dotenv.config({ path: './config.env' }); //must be before require app
