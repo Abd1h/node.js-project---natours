@@ -2,19 +2,26 @@ const Tour = require('../models/tourModels');
 
 exports.getAllTours = async function (req, res) {
   try {
-    // - FILTERING using the query string
-    //note const queryObj = req.query; --> 🛑WRONG cause this is not a copy of the object its a ''pointer''
+    // * FILTERING using the query string
+    //note const queryObj = req.query; --> 🛑WRONG
     const queryObj = { ...req.query };
 
-    // - array of exceptions or excluded keys
-    const excludedFields = ['page', 'sort', 'limit', 'fields'];
-    excludedFields.forEach((el) => {
-      console.log(el);
-      delete queryObj[el];
-    });
-    //if there is query string -->{name = The Sea} and if there isnt -->{empty} which will select all tours
-    const tours = await Tour.find(queryObj);
+    const excludedFields = ['page', 'sort', 'limit', 'fields']; //not for searching keys
+    excludedFields.forEach((el) => delete queryObj[el]);
 
+    // * advance FILTERING
+    let queryString = JSON.stringify(queryObj);
+    queryString = queryString.replace(
+      /\b(gte|gt|lte|lt)\b/g, //b = this exact word,g = everywhere
+      (match) => `$${match}` //note: replace return a callback
+    );
+
+    const query = Tour.find(JSON.parse(queryString));
+
+    // * EXECUTE QUERY
+    const tours = await query;
+    //note: if there is query string -->{name = The Sea}
+    //and   if there isnt -->{empty} which will select all tours
     res.status(200).json({
       status: 'success',
       results: tours.length,
