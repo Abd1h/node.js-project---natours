@@ -28,6 +28,7 @@ exports.getAllTours = async function (req, res) {
       //defualt --> sort by date
       query = query.sort('_createdAt');
     }
+
     // 3) FIELD LIMIGING 'not sending all keys of the data object'
     if (req.query.fields) {
       const fields = req.query.fields.split(',').join(' ');
@@ -37,7 +38,20 @@ exports.getAllTours = async function (req, res) {
       query.select('-__v');
     }
 
-    // 4)
+    // 4) PAGINATION '/api/v1/tours? page=2 & limit=5'
+
+    // page.1 => 1-5 // page.2 => 6-10 // page.3 => 11-15
+    // methods => skip() ,limit()
+    const page = +req.query.page || 1;
+    const limit = +req.query.limit || 100;
+    const skipNum = (page - 1) * limit;
+
+    query = query.skip(skipNum).limit(limit);
+    //if user skips all tours
+    if (req.query.page) {
+      const numberOfTours = await Tour.countDocuments();
+      if (skipNum >= numberOfTours) throw new Error('This Page Dose Not Exist');
+    }
     // * EXECUTE QUERY
     const tours = await query;
     //note: if there is query string -->{name = The Sea}
