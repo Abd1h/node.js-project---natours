@@ -2,7 +2,7 @@ const Tour = require('../models/tourModels');
 
 exports.getAllTours = async function (req, res) {
   try {
-    // * FILTERING using the query string
+    // 1) FILTERING url using the query string
     //note const queryObj = req.query; --> 🛑WRONG
     const queryObj = { ...req.query };
 
@@ -15,8 +15,20 @@ exports.getAllTours = async function (req, res) {
       /\b(gte|gt|lte|lt)\b/g, //b = this exact word,g = everywhere
       (match) => `$${match}` //note: replace return a callback
     );
+    //note we dont await so we can use other methods 'sort,skip..'
+    let query = Tour.find(JSON.parse(queryString));
 
-    const query = Tour.find(JSON.parse(queryString));
+    // 2) SORTING
+    //127.0.0.1:8000/api/v1/tours?name=aaa&sort=-price,duration --> means sort by 'price' and if they have the same price then sort them by 'duration'..
+    if (req.query.sort) {
+      const sortBy = req.query.sort.split(',').join(' ');
+      //note that sort return a query so you can chain other methods
+      query = query.sort(sortBy);
+    } else {
+      //defualt --> sort by date
+      query = query.sort('_createdAt');
+    }
+    // 3) FIELD LIMIGING 'not sending all keys of the data object'
 
     // * EXECUTE QUERY
     const tours = await query;
