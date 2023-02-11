@@ -29,7 +29,15 @@ exports.getAllTours = async function (req, res) {
       query = query.sort('_createdAt');
     }
     // 3) FIELD LIMIGING 'not sending all keys of the data object'
+    if (req.query.fields) {
+      const fields = req.query.fields.split(',').join(' ');
+      query = query.select(fields);
+    } else {
+      // remove fields that are created by mongoose like (__v) using (-)
+      query.select('-__v');
+    }
 
+    // 4)
     // * EXECUTE QUERY
     const tours = await query;
     //note: if there is query string -->{name = The Sea}
