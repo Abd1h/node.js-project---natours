@@ -1,5 +1,5 @@
 const Tour = require('../models/tourModels');
-const SearchFeatures = require('../utils/searchFeatures');
+const SearchFeatures = require('../utils/searchFeatures'); //class of features methods
 //-------------------------------------------
 //         middleware
 //-------------------------------------------
