@@ -1,11 +1,26 @@
 const Tour = require('../models/tourModels');
 
+//-------------------------------------------
+//         middleware
+//-------------------------------------------
+//function to manipulate the search query | runs before getAllTours()
+exports.top5Cheap = function (req, res, next) {
+  console.log('running');
+  // tours/top-5-cheap ---> tours/limit=5&sort=-ratingsAverage,price
+  req.query.limit = 5;
+  req.query.sort = '-ratingsAverage, price';
+  req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
+  next();
+};
+//-------------------------------------------
+//       route methods functionality
+//-------------------------------------------
 exports.getAllTours = async function (req, res) {
   try {
     // 1) FILTERING url using the query string
     //note const queryObj = req.query; --> 🛑WRONG
     const queryObj = { ...req.query };
-
+    console.log(queryObj);
     const excludedFields = ['page', 'sort', 'limit', 'fields']; //not for searching keys
     excludedFields.forEach((el) => delete queryObj[el]);
 
@@ -19,7 +34,7 @@ exports.getAllTours = async function (req, res) {
     let query = Tour.find(JSON.parse(queryString));
 
     // 2) SORTING
-    //127.0.0.1:8000/api/v1/tours?name=aaa&sort=-price,duration --> means sort by 'price' and if they have the same price then sort them by 'duration'..
+    //127.0.0.1:8000/api/v1/tours?name=aaa&sort=-price,duration
     if (req.query.sort) {
       const sortBy = req.query.sort.split(',').join(' ');
       //note that sort return a query so you can chain other methods
@@ -29,7 +44,7 @@ exports.getAllTours = async function (req, res) {
       query = query.sort('_createdAt');
     }
 
-    // 3) FIELD LIMIGING 'not sending all keys of the data object'
+    // 3) FIELD LIMITING 'not sending all keys of the data object'
     if (req.query.fields) {
       const fields = req.query.fields.split(',').join(' ');
       query = query.select(fields);

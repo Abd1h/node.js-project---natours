@@ -11,6 +11,11 @@ toursRouter
   .route('/')
   .get(toursController.getAllTours)
   .post(toursController.createTour);
+// * special route to filter tours search results
+//not top5Cheap is a middelware
+toursRouter
+  .route('/top-5-cheap')
+  .get(toursController.top5Cheap, toursController.getAllTours);
 
 // 3- for '/api/v1/tours/:id'
 // // checking if ID is valid using param middlware
