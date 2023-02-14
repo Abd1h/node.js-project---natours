@@ -14,6 +14,46 @@ exports.top5Cheap = function (req, res, next) {
 };
 
 //-------------------------------------------
+//            aggregation
+//-------------------------------------------
+exports.getTourStats = async function (req, res) {
+  try {
+    //call aggregate on the model "collection"
+    const stats = await Tour.aggregate([
+      {
+        //stage 1 :get all tours that has price >=300
+        $match: { price: { $gte: 300 } },
+      },
+      {
+        //stage 2  : group tours that has the same id value with displaying some commen proprties
+        $group: {
+          _id: '$difficulty', //to upper case
+          avgRating: { $avg: '$ratingsAverage' },
+          avgPrice: { $avg: '$price' },
+          minPrice: { $min: '$price' },
+          maxPrice: { $max: '$price' },
+          numTours: { $sum: 1 },
+        },
+      },
+      {
+        //stage 3 : sort them by price (1 = small to pig)
+        $sort: { avgPrice: 1 },
+      },
+    ]);
+
+    res.status(200).json({
+      status: 'success',
+      data: { stats },
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err,
+    });
+  }
+};
+
+//-------------------------------------------
 //       route methods functionality
 //-------------------------------------------
 exports.getAllTours = async function (req, res) {
