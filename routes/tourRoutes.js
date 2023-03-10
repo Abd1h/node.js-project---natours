@@ -16,8 +16,10 @@ toursRouter
 toursRouter
   .route('/top-5-cheap')
   .get(toursController.top5Cheap, toursController.getAllTours);
-// spical route
+// spical route 1
 toursRouter.route('/tours-stats').get(toursController.getTourStats);
+// spical route 2
+toursRouter.route('/get-month-status/:year').get(toursController.getYearStatus);
 
 // 3- for '/api/v1/tours/:id'
 // // checking if ID is valid using param middlware

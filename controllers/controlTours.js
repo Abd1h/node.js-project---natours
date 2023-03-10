@@ -27,7 +27,7 @@ exports.getTourStats = async function (req, res) {
       {
         //stage 2  : group tours that has the same id value with displaying some commen proprties
         $group: {
-          _id: '$difficulty', //to upper case
+          _id: '$difficulty', //[ easy,medium,difficult ]
           avgRating: { $avg: '$ratingsAverage' },
           avgPrice: { $avg: '$price' },
           minPrice: { $min: '$price' },
@@ -39,11 +39,67 @@ exports.getTourStats = async function (req, res) {
         //stage 3 : sort them by price (1 = small to pig)
         $sort: { avgPrice: 1 },
       },
+      //stage 4 : select all the docs that has the id not equal '$ne' easy
+      {
+        $match: { _id: { $ne: 'easy' } }, //note that we can repeat stages
+      },
     ]);
 
     res.status(200).json({
       status: 'success',
       data: { stats },
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err,
+    });
+  }
+};
+
+exports.getYearStatus = async function (req, res) {
+  try {
+    const year = req.params.year * 1;
+    console.log(new Date(`${year}-01-01`));
+    const yearStatus = await Tour.aggregate([
+      {
+        //a tour can have 3 or more dates "happen multiple times a year", so to make a separate doc for every date
+        $unwind: '$startDates',
+      },
+      {
+        //select only the tours with the specified year
+        $match: {
+          startDates: {
+            $gte: new Date(`${year}-01-01`),
+            $lte: new Date(`${year}-12-31`),
+          },
+        },
+      },
+      {
+        //group tours who has the same month
+        $group: {
+          _id: { $month: '$startDates' },
+          numOfTours: { $sum: 1 }, //number of tours in every group
+          toursName: { $push: '$name' },
+        },
+      },
+      {
+        //ading month instad of id
+        $addFields: { month: '$_id' },
+      },
+      {
+        $project: { _id: 0 },
+      },
+      {
+        //sort descending
+        $sort: { numOfTours: -1 },
+      },
+    ]);
+
+    res.status(200).json({
+      status: 'success',
+      result: yearStatus.length,
+      data: { yearStatus },
     });
   } catch (err) {
     res.status(404).json({
@@ -127,6 +183,7 @@ exports.updateTour = async function (req, res) {
   try {
     //1) getting targeted tour id
     const tourId = req.params.id;
+
     //1) update tour with the comming data
     //NOTE findByIdAndUpdate(ID, new data, options)
     const tour = await Tour.findByIdAndUpdate(tourId, req.body, {
