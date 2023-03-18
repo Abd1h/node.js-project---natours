@@ -9,6 +9,8 @@ const tourSchema = new mongoose.Schema(
       required: [true, 'A tour must have a name'],
       unique: [true, 'use different name'],
       trim: true,
+      maxlength: [40, 'tour name must be less or equal 40 characters'],
+      minlength: [10, 'tour name must be more or equal 10 characters'],
     },
     slug: String,
     duration: {
@@ -22,10 +24,18 @@ const tourSchema = new mongoose.Schema(
     difficulty: {
       type: String,
       required: true,
+      enum: {
+        //allow a specific limited values 'for strings only'
+        //we created object cuz we cant add error message
+        values: ['easy', 'medium', 'difficult'],
+        message: `diffculty is either :'easy', 'medium', 'difficult'`,
+      },
     },
     ratingsAverage: {
       type: Number,
       default: 4.5,
+      min: [1, 'rating must be above 1.0'], //work on date too
+      max: [5, 'rating must be below 5'],
     },
     reatingsQuantity: {
       type: Number,
@@ -35,7 +45,16 @@ const tourSchema = new mongoose.Schema(
       type: Number,
       required: [true, 'a tour must have a price'],
     },
-    priceDiscount: Number,
+    priceDiscount: {
+      type: Number,
+      validate: {
+        //custom validator
+        valditore: function (val) {
+          return val < this.price;
+        },
+        message: 'discount must be less then the original price',
+      },
+    },
     summary: {
       type: String,
       trim: true, // this will trim all the extra spaces
