@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-
+const slugify = require('slugify');
 // creating mongoose schema for tours
 const tourSchema = new mongoose.Schema(
   {
@@ -10,6 +10,7 @@ const tourSchema = new mongoose.Schema(
       unique: [true, 'use different name'],
       trim: true,
     },
+    slug: String,
     duration: {
       type: Number,
       required: [true, 'a tour must have a duration'],
@@ -54,6 +55,12 @@ const tourSchema = new mongoose.Schema(
     },
     startDates: [Date], // array of dates
     images: [String],
+
+    //tours that wont diplays
+    secretTour: {
+      type: Boolean,
+      default: false,
+    },
   },
   //options object
   {
@@ -71,6 +78,48 @@ tourSchema.virtual('durationWeek').get(function () {
   return this.duration / 7;
 });
 
+//MONGOOSE MIDDLEWARE
+//1) DOCUMENT MIDDLEWARE :runs before/after .save() .create()
+tourSchema.pre('save', function (next) {
+  // console.log(this); // return the created document
+
+  //1) creating slug : slug is a string of the document name that will be added to the schema by npm package 'slugify'
+  // after adding slug : string to the schema
+  this.slug = slugify(this.name, { lower: true }); // also make it lowercase
+  //2)moving to the next middleware
+  next();
+});
+
+//this runs after saving the doc to the DB
+tourSchema.post('save', (doc, next) => {
+  //console.log(doc); //note that we dont use this.keyword cuz post has accses to the created doc object
+  next();
+});
+
+//2) QUERY MIDDLEWARE "runs before/after any find query is excuted"
+tourSchema.pre(/^find/, function (next) {
+  //thit.keyword will point to the query of the find method
+  //and like we chanied .filtering() .sorting() on that query we can chain another find method
+
+  this.find({ secretTour: { $ne: true } }); //filtering secret tours from the query
+
+  next();
+});
+
+tourSchema.post(/^find/, (docs, next) => {
+  console.log(docs); //post here has accses to all docs returned form the query
+  next();
+});
+
+//3 AGGREGATION MIDDLEWARE "runs before/after every aggregation"
+tourSchema.pre('aggregate', function (next) {
+  //console.log(this.); //points to the current aggregation object
+  // "this.pipeline()" returns the array we passed into aggregation([])
+
+  //eliminating secert tours from aggregation
+  this.pipline().unshift({ $match: { secretTour: { $ne: true } } }); //'unshift' adds el to the start of an array
+  next();
+});
 //creating module of that schema
 //NOTE model name start with upper case letter
 //NOTE the name of the collection will come from 'Tour'
