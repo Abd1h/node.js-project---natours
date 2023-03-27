@@ -126,7 +126,7 @@ tourSchema.pre(/^find/, function (next) {
 });
 
 tourSchema.post(/^find/, (docs, next) => {
-  console.log(docs); //post here has accses to all docs returned form the query
+  // console.log(docs); //post here has accses to all docs returned form the query
   next();
 });
 
