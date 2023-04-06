@@ -1,5 +1,7 @@
 const Tour = require('../models/tourModels');
 const SearchFeatures = require('../utils/searchFeatures'); //class of features methods
+
+const catchAsync = require('../utils/catchAsync');
 //-------------------------------------------
 //         middleware
 //-------------------------------------------
@@ -112,106 +114,77 @@ exports.getYearStatus = async function (req, res) {
 //-------------------------------------------
 //       route methods functionality
 //-------------------------------------------
-exports.getAllTours = async function (req, res) {
-  try {
-    //1) getting result form DB after applying our search features
-    const searchQuery = new SearchFeatures(req.query, Tour.find())
-      .filtering()
-      .sorting()
-      .fieldsLimiting()
-      .pagination();
-    // 2) await for query result
-    const tours = await searchQuery.queryResults;
-    // 3) send back resurlt as a respond
-    res.status(200).json({
-      status: 'success',
-      results: tours.length,
-      data: tours,
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: 'fail',
-      message: err,
-    });
-  }
-};
 
-exports.getSingleTour = async function (req, res) {
-  try {
-    //1) getting tour id from the URL
-    const tourId = req.params.id;
-    //2) look it up throw tour collection
-    const tour = await Tour.findById(tourId);
-    // const tour = await Tour.findOne({ _id: tourId });
+exports.getAllTours = catchAsync(async (req, res, next) => {
+  //1) getting result form DB after applying our search features
+  const searchQuery = new SearchFeatures(req.query, Tour.find())
+    .filtering()
+    .sorting()
+    .fieldsLimiting()
+    .pagination();
+  // 2) await for query result
+  const tours = await searchQuery.queryResults;
+  // 3) send back resurlt as a respond
+  res.status(200).json({
+    status: 'success',
+    results: tours.length,
+    data: tours,
+  });
+});
 
-    res.status(200).json({
-      status: 'sccuss',
-      data: tour,
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: 'fail',
-      message: err,
-    });
-  }
-};
+exports.getSingleTour = catchAsync(async (req, res, next) => {
+  //1) getting tour id from the URL
+  const tourId = req.params.id;
+  //2) look it up throw tour collection
+  const tour = await Tour.findById(tourId);
+  // const tour = await Tour.findOne({ _id: tourId });
 
-exports.createTour = async function (req, res) {
-  try {
-    //1) getting post data
-    const tourData = req.body;
+  res.status(200).json({
+    status: 'sccuss',
+    data: tour,
+  });
+});
 
-    //2) creatting new db document
-    //NOTE that create() return a promise
-    const newTour = await Tour.create(tourData);
+exports.createTour = catchAsync(async (req, res, next) => {
+  //1) getting post data
+  const tourData = req.body;
 
-    //201 means "updated"
-    res.status(201).json({
-      status: 'success',
-      data: { tour: newTour },
-    });
-  } catch (err) {
-    //400 means "bad input"
-    res.status(400).json({
-      status: 'fail',
-      message: err.message,
-    });
-  }
-};
+  //2) creatting new db document
+  //NOTE that create() return a promise
+  const newTour = await Tour.create(tourData);
 
-exports.updateTour = async function (req, res) {
-  try {
-    //1) getting targeted tour id
-    const tourId = req.params.id;
+  //201 means "updated"
+  res.status(201).json({
+    status: 'success',
+    data: { tour: newTour },
+  });
+});
 
-    //1) update tour with the comming data
-    //NOTE findByIdAndUpdate(ID, new data, options)
-    const tour = await Tour.findByIdAndUpdate(tourId, req.body, {
-      runValidators: true, // will rerun schema validators
-      new: true, // returns the doc after update instead of the original
-    });
-    res.status(200).json({
-      status: 'success',
-      data: tour,
-    });
-  } catch (err) {
-    res.status(404).json({ status: 'fail', message: err });
-  }
-};
+exports.updateTour = catchAsync(async (req, res, next) => {
+  //1) getting targeted tour id
+  const tourId = req.params.id;
 
-exports.deleteTour = async function (req, res) {
-  try {
-    const tourId = req.params.id;
-    const tour = await Tour.findByIdAndDelete(tourId);
+  //1) update tour with the comming data
+  //NOTE findByIdAndUpdate(ID, new data, options)
+  const tour = await Tour.findByIdAndUpdate(tourId, req.body, {
+    runValidators: true, // will rerun schema validators
+    new: true, // returns the doc after update instead of the original
+  });
+  res.status(200).json({
+    status: 'success',
+    data: tour,
+  });
+});
 
-    res.status(200).json({
-      status: 'success',
-      data: tour,
-    });
-  } catch (err) {
-    res.status(404).json({ status: 'fail', message: err });
-  }
-};
+exports.deleteTour = catchAsync(async (req, res, next) => {
+  const tourId = req.params.id;
+  const tour = await Tour.findByIdAndDelete(tourId);
+
+  res.status(200).json({
+    status: 'success',
+    data: tour,
+  });
+});
 
 //// ---------------functions-------------------
 //<><><><> not need for the commented code since our mongoose schema will do the validation for us <><><><>//

@@ -10,6 +10,7 @@ app.use(express.json()); //middleware for post method
 const morgan = require('morgan');
 // -utils classes
 const AppError = require('./utils/appError');
+const globalErrorHandler = require('./controllers/controlError');
 // -importing routes sub apps
 const usersRouter = require('./routes/userRoutes');
 const toursRouter = require('./routes/tourRoutes');
@@ -29,13 +30,9 @@ app.all('*', (req, res, next) => {
   );
 });
 
-//error handling middleware
-app.use((err, req, res, next) => {
-  err.statusCode = err.statusCode || 500;
-  err.status = err.status || 'error';
+//ERROR HANDLING MIDDELWARE
+app.use(globalErrorHandler);
 
-  res.status(err.statusCode).json({ status: err.status, message: err.message });
-});
 //<><><><><><><><><><><><><><><><><><><><><><><><><><>//
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
