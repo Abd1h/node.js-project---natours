@@ -17,6 +17,7 @@ mongoose
     useNewUrlParser: true,
     useCreateIndex: true,
     useFindAndModify: false,
+    useUnifiedTopology: true,
   }) //NOTE mongoose connect methods return a promise with object
   .then(() => console.log('mongoose connected'));
 

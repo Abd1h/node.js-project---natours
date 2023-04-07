@@ -2,6 +2,7 @@ const Tour = require('../models/tourModels');
 const SearchFeatures = require('../utils/searchFeatures'); //class of features methods
 
 const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
 //-------------------------------------------
 //         middleware
 //-------------------------------------------
@@ -138,7 +139,10 @@ exports.getSingleTour = catchAsync(async (req, res, next) => {
   //2) look it up throw tour collection
   const tour = await Tour.findById(tourId);
   // const tour = await Tour.findOne({ _id: tourId });
-
+  //3) error handling
+  if (!tour) {
+    return next(new AppError('no tour was found for this ID', 404));
+  }
   res.status(200).json({
     status: 'sccuss',
     data: tour,
@@ -164,12 +168,16 @@ exports.updateTour = catchAsync(async (req, res, next) => {
   //1) getting targeted tour id
   const tourId = req.params.id;
 
-  //1) update tour with the comming data
+  //2) update tour with the comming data
   //NOTE findByIdAndUpdate(ID, new data, options)
   const tour = await Tour.findByIdAndUpdate(tourId, req.body, {
     runValidators: true, // will rerun schema validators
     new: true, // returns the doc after update instead of the original
   });
+  //3) error handling
+  if (!tour) {
+    return next(new AppError('no tour was found for this ID', 404));
+  }
   res.status(200).json({
     status: 'success',
     data: tour,
@@ -180,6 +188,10 @@ exports.deleteTour = catchAsync(async (req, res, next) => {
   const tourId = req.params.id;
   const tour = await Tour.findByIdAndDelete(tourId);
 
+  //- error handling
+  if (!tour) {
+    return next(new AppError('no tour was found for this ID', 404));
+  }
   res.status(200).json({
     status: 'success',
     data: tour,

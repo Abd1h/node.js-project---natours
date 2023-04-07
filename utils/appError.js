@@ -4,7 +4,7 @@ class appError extends Error {
     //also the Error class will set the message proprty to message value
     super(message);
 
-    this.statuscode = statusCode;
+    this.statusCode = statusCode;
     this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error'; //404 =fail , 500 = error
     this.operationalError = true;
 
