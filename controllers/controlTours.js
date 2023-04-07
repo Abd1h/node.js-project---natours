@@ -140,6 +140,7 @@ exports.getSingleTour = catchAsync(async (req, res, next) => {
   const tour = await Tour.findById(tourId);
   // const tour = await Tour.findOne({ _id: tourId });
   //3) error handling
+
   if (!tour) {
     return next(new AppError('no tour was found for this ID', 404));
   }
