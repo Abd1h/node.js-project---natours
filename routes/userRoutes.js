@@ -1,5 +1,6 @@
 const express = require('express');
 const usersController = require('../controllers/controlUsers');
+const authController = require('../controllers/authController');
 //<><><><><><><><><><><><><><><><><><><><><><><><><><>//
 //mounting routers
 const usersRouter = express.Router();
@@ -15,4 +16,6 @@ usersRouter
   .patch(usersController.updateUser)
   .delete(usersController.deleteUser);
 
+//3- for '/api/v1/users/signup'
+usersRouter.route('/signup').post(authController.signup);
 module.exports = usersRouter;

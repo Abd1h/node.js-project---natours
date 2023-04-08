@@ -49,6 +49,7 @@ const tourSchema = new mongoose.Schema(
       type: Number,
       validate: {
         //custom validator
+        //works only on save()
         validator: function (val) {
           return val < this.price;
         },
