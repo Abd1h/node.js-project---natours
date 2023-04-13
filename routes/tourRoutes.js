@@ -1,5 +1,6 @@
 const express = require('express');
 const toursController = require('../controllers/controlTours');
+const authController = require('../controllers/authController');
 //<><><><><><><><><><><><><><><><><><><><><><><><><><>//
 //// Mounting Routers
 
@@ -9,7 +10,7 @@ const toursRouter = express.Router();
 // 2- for '/api/v1/tours'
 toursRouter
   .route('/')
-  .get(toursController.getAllTours)
+  .get(authController.protect, toursController.getAllTours)
   .post(toursController.createTour);
 
 //note top5Cheap is a middelware

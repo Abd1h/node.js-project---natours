@@ -1,4 +1,6 @@
+const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
+
 const User = require('../models/userModels');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
@@ -59,4 +61,33 @@ exports.login = catchAsync(async (req, res, next) => {
     status: 'success',
     token,
   });
+});
+
+//check access to tour data
+exports.protect = catchAsync(async (req, res, next) => {
+  //1) getting token from headers
+  let token;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('bearer')
+  ) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+
+  if (!token) {
+    return next(new AppError('please log in first!!', 401));
+  }
+
+  // 2) VERIFY TOKEN (token manipulated?,token expired?)
+  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECERT);
+  //decoded = { id: '6437c653d7dc3f3ed42dac78', iat: 1681395477, exp: 1689171477 }
+  //errors names: "name": "JsonWebTokenError" ||||"name": "TokenExpiredError"
+  //NOTE
+  // jwt.verify doesnt return a promise,
+  // so to keep up the them will use the node.js build-in func 'promisify'
+
+  // 3) check if user still exists (loged in)
+
+  // 4) check if user chagned password after token was ussued 'created'
+  next();
 });

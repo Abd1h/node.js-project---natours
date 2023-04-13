@@ -2,7 +2,7 @@ const AppError = require('../utils/appError');
 //-------------------------------------------
 //                FUNCTIONS
 //-------------------------------------------
-const handleDevelopmentError = function (res, err) {
+const sendDevelError = function (res, err) {
   res.status(err.statusCode).json({
     status: err.status,
     error: err,
@@ -10,7 +10,7 @@ const handleDevelopmentError = function (res, err) {
     stack: err.stack,
   });
 };
-const handleProductionError = function (res, err) {
+const sendProdError = function (res, err) {
   //1) handle operation error (errors that we handled and set responds for)
   if (err.operationalError) {
     res.status(err.statusCode).json({
@@ -37,10 +37,12 @@ const handleCastErrorDB = function (err) {
 const handleDuplicateFieldsDB = function (err) {
   //1) getting the duplicated field from errmsg string
   //using RexEx "(.*?)" which returns an array
-  const duplicatedValue = err.errmsg.match(/"(.*?)"/)[0];
+  const duplicatedValue = `( ${Object.keys(err.keyValue)}:${Object.values(
+    err.keyValue
+  )} )`;
 
   //2) set message
-  const message = `Duplicated field value: ${duplicatedValue}, please use different value`;
+  const message = `Duplicated field ${duplicatedValue}, please use different value`;
   return new AppError(message, 400);
 };
 
@@ -62,31 +64,22 @@ module.exports = (err, req, res, next) => {
 
   //DEVELOPMENT
   if (process.env.NODE_ENV === 'development') {
-    handleDevelopmentError(res, err);
+    sendDevelError(res, err);
   }
 
   //PRODUCTION
   if (process.env.NODE_ENV === 'production') {
     //1) handle (make them operational errors)
     // mongoDB 3 errors (duplicate name , invalid Id , difficulty validation )
+    let error = { ...err };
 
     //A) invalid ID "eeeeee"
-    if (err.name === 'CastError') {
-      const error = handleCastErrorDB(err);
-      return handleProductionError(res, error);
-    }
-
+    if (err.name === 'CastError') error = handleCastErrorDB(error);
     //B) duplicate fields
-    if (err.code === 11000) {
-      const error = handleDuplicateFieldsDB(err);
-      return handleProductionError(res, error);
-    }
-
+    if (err.code === 11000) error = handleDuplicateFieldsDB(error);
     //C) validation error
-    if (err.name === 'ValidationError') {
-      const error = handleValidatorErrorDB(err);
-      return handleProductionError(res, error);
-    }
-    handleProductionError(res, err);
+    if (err.name === 'ValidationError') error = handleValidatorErrorDB(error);
+
+    sendProdError(res, error);
   }
 };
