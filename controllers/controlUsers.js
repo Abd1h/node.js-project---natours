@@ -1,5 +1,6 @@
 const fs = require('fs');
-
+const User = require('../models/userModels');
+const catchAsync = require('../utils/catchAsync');
 //<><><><><><><><><><><><><><><><><><><><><><><><><><>//
 
 //downloading sync since we need to download it once
@@ -9,19 +10,20 @@ const tours = JSON.parse(
 );
 
 //user functions
-exports.getAllUsers = function (req, res) {
+exports.getAllUsers = catchAsync(async (req, res, next) => {
+  const users = await User.find();
   res.status(200).json({
     status: 'success',
-    results: tours.length,
-    data: { tours: tours },
+    results: users.length,
+    data: { users },
   });
-};
+});
 
 exports.getSingleUser = function (req, res) {
   //1) getting the tour id
   const id = +req.params.id;
   //2) finding tour with that id
-  const tour = tours.find((tour) => tour.id === id);
+  const tour = tours.find((tour2) => tour2.id === id);
   //3) if tour exist then send it as a respond
   if (!tour) {
     res.status(404).json({
@@ -48,7 +50,7 @@ exports.createUser = function (req, res) {
   fs.writeFile(
     `${__dirname}/dev-data/data/tours-simple.json`,
     JSON.stringify(tours),
-    (err) => {
+    () => {
       //201 means "updated"
       res.status(201).json({
         status: 'success',

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-const becrypt = require('bcryptjs');
+const bcrypt = require('bcryptjs');
 //SCHEMA
 const userSchema = new mongoose.Schema({
   name: { type: String, required: [true, 'please enter your name'] },
@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, 'please enter a password'],
     minlength: 8,
-    Select: false,
+    select: false,
   },
   passwordComfirm: {
     type: String,
@@ -31,7 +31,7 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-//encryption middleware
+//encryption MIDDLEWARE
 userSchema.pre('save', async function (next) {
   //1) only run this if password was modified "updated or created"
   //isModified method that exist for all documents
@@ -39,13 +39,19 @@ userSchema.pre('save', async function (next) {
 
   //2) hash the password
   // cost = 12, is how much CPU you went to use "default is 10"
-  this.password = await becrypt.hash(this.password, 12);
+  this.password = await bcrypt.hash(this.password, 12);
 
   //3) delete password confirm
   this.passwordComfirm = undefined;
   next();
 });
 
+//check password MIDDLEWARE
+//using Instance Method which will be available on all docs
+userSchema.methods.checkPassword = function (candiatePassword, userPassword) {
+  //candiatePassword = uncrypted password
+  return bcrypt.compare(candiatePassword, userPassword);
+};
 //MODEL
 const User = mongoose.model('User', userSchema);
 module.exports = User;
