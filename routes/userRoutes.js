@@ -18,4 +18,5 @@ usersRouter
 
 //3- for '/api/v1/users/signup'
 usersRouter.route('/signup').post(authController.signup);
+usersRouter.route('/login').post(authController.login);
 module.exports = usersRouter;

@@ -1,15 +1,42 @@
+const jwt = require('jsonwebtoken');
 const User = require('../models/userModels');
 const catchAsync = require('../utils/catchAsync');
-
+const AppError = require('../utils/appError');
+//SIGN-UP
 exports.signup = catchAsync(async (req, res, next) => {
-  //1) create user the the req data
-  const newUser = await User.create(req.body);
-  //2) send respons
+  //1) create user with the required data req data
+  //dont use req.body cuz user could manually put a roll
+  const newUser = await User.create({
+    name: req.body.name,
+    email: req.body.email,
+    password: req.body.password,
+    passwordComfirm: req.body.passwordComfirm,
+  });
+
+  //2) sing in the user "create uniqe token"
+  const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECERT, {
+    expiresIn: process.env.JWT_EXPIRED_DATE,
+  });
+
   res.status(201).json({
     status: 'success',
+    token,
     data: {
       user: newUser,
     },
   });
   //3) error handled by (catchAsync)
+});
+
+//LOG-IN
+exports.login = catchAsync(async (req, res, next) => {
+  //1) check if (email,password) is given
+  const { email, password } = req.body;
+  if (!email || !password)
+    return next(new AppError('please enter your email and password'), 400);
+
+  //2)check if user exist (email)
+  const user = await User.findOne({ email: email });
+  console.log(user);
+  //3) verify password
 });

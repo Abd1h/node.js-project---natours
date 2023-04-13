@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, 'please enter a password'],
     minlength: 8,
+    Select: false,
   },
   passwordComfirm: {
     type: String,
@@ -33,11 +34,11 @@ const userSchema = new mongoose.Schema({
 //encryption middleware
 userSchema.pre('save', async function (next) {
   //1) only run this if password was modified "updated or created"
-  //isModified method that exist for documents
+  //isModified method that exist for all documents
   if (!this.isModified('password')) return next();
 
   //2) hash the password
-  // cost = 12, is how much cpu you went to use "defualt is 10"
+  // cost = 12, is how much CPU you went to use "default is 10"
   this.password = await becrypt.hash(this.password, 12);
 
   //3) delete password confirm
