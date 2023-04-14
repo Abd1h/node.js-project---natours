@@ -56,9 +56,11 @@ userSchema.methods.checkPassword = function (candiatePassword, userPassword) {
 
 //check if password changed MIDDLEWARE
 userSchema.methods.passwordChangedAfter = function (tokenIat) {
-  const passowrdChangeDate = this.changedPasswordAt.getTime() / 1000; //date --> sec
-  console.log(passowrdChangeDate);
+  const passowrdChangeDate = this.changedPasswordAt
+    ? this.changedPasswordAt.getTime() / 1000
+    : null; //date --> sec
 
+  //token creation date 'iat' < new password date ==true THEN user needs to login again
   if (this.changedPasswordAt) {
     return tokenIat < passowrdChangeDate;
   }

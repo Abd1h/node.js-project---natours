@@ -83,9 +83,6 @@ exports.protect = catchAsync(async (req, res, next) => {
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECERT);
   //decoded = { id: '6437c653d7dc3f3ed42dac78', iat: 1681395477, exp: 1689171477 }
   //errors names: "name": "JsonWebTokenError" ||||"name": "TokenExpiredError"
-  //NOTE
-  // jwt.verify doesnt return a promise,
-  // so to keep up the them will use the node.js build-in func 'promisify'
 
   // 3) check if user still exists (loged in)
   const currentUser = await User.findById(decoded.id);
@@ -103,5 +100,7 @@ exports.protect = catchAsync(async (req, res, next) => {
       new AppError('passoword has been changed recently, please log-in again')
     );
   }
+  //everything checked☑, give access
+  req.user = currentUser;
   next();
 });
