@@ -54,6 +54,15 @@ const handleValidatorErrorDB = function (err) {
 
   return new AppError(message, 400);
 };
+
+const handleJWT = function () {
+  const message = `Invalid Token, please try again`;
+  return new AppError(message, 401);
+};
+const handleExpiredToken = function () {
+  const message = `Expired Token, please log-in and try again`;
+  return new AppError(message, 401);
+};
 //-------------------------------------------
 //-------------------------------------------
 
@@ -69,8 +78,8 @@ module.exports = (err, req, res, next) => {
 
   //PRODUCTION
   if (process.env.NODE_ENV === 'production') {
-    //1) handle (make them operational errors)
-    // mongoDB 3 errors (duplicate name , invalid Id , difficulty validation )
+    // handle (make them operational errors)
+    // 1) mongoDB 3 errors (duplicate name , invalid Id , difficulty validation )
     let error = { ...err };
 
     //A) invalid ID "eeeeee"
@@ -80,6 +89,13 @@ module.exports = (err, req, res, next) => {
     //C) validation error
     if (err.name === 'ValidationError') error = handleValidatorErrorDB(error);
 
+    //2 )protect method errors
+    //A) manipulated TOKEN "name": "JsonWebTokenError"
+    if (err.name === 'JsonWebTokenError') error = handleJWT();
+    //B) expired token "name": "TokenExpiredError"
+    if (err.name === 'TokenExpiredError') error = handleExpiredToken();
+
+    // FINALLY SEND ERROR MSG
     sendProdError(res, error);
   }
 };

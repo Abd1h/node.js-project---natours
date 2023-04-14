@@ -3,6 +3,7 @@ const validator = require('validator');
 const bcrypt = require('bcryptjs');
 //SCHEMA
 const userSchema = new mongoose.Schema({
+  changedPasswordAt: { type: Date, select: true },
   name: { type: String, required: [true, 'please enter your name'] },
   email: {
     type: String,
@@ -51,6 +52,18 @@ userSchema.pre('save', async function (next) {
 userSchema.methods.checkPassword = function (candiatePassword, userPassword) {
   //candiatePassword = uncrypted password
   return bcrypt.compare(candiatePassword, userPassword);
+};
+
+//check if password changed MIDDLEWARE
+userSchema.methods.passwordChangedAfter = function (tokenIat) {
+  const passowrdChangeDate = this.changedPasswordAt.getTime() / 1000; //date --> sec
+  console.log(passowrdChangeDate);
+
+  if (this.changedPasswordAt) {
+    return tokenIat < passowrdChangeDate;
+  }
+  // false = Password not changed
+  return false;
 };
 //MODEL
 const User = mongoose.model('User', userSchema);

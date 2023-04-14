@@ -23,6 +23,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     email: req.body.email,
     password: req.body.password,
     passwordComfirm: req.body.passwordComfirm,
+    changedPasswordAt: req.body.changedPasswordAt,
   });
 
   //2) sing in the user "create uniqe token"
@@ -87,7 +88,20 @@ exports.protect = catchAsync(async (req, res, next) => {
   // so to keep up the them will use the node.js build-in func 'promisify'
 
   // 3) check if user still exists (loged in)
+  const currentUser = await User.findById(decoded.id);
+  if (!currentUser) {
+    return next(new AppError('please log-in, and try again'), 401);
+  }
 
-  // 4) check if user chagned password after token was ussued 'created'
+  // 4) check if user chagned password after token was issued 'created'
+  const passwordChangedAfterStatus = currentUser.passwordChangedAfter(
+    decoded.iat
+  ); //Instance Method
+
+  if (passwordChangedAfterStatus) {
+    return next(
+      new AppError('passoword has been changed recently, please log-in again')
+    );
+  }
   next();
 });
